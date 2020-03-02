@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>io.seg.kofo</groupId>
+	<artifactId>eth-watch-only</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<modules>
+		<module>api</module>
+		<module>ethwo</module>
+	</modules>
+	<packaging>pom</packaging>
+
+	<name>eth-watch-only</name>
+	<description>seg eth-watch-only</description>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.5.10.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<spring-cloud.version>Edgware.SR3</spring-cloud.version>
+		<!--util-->
+		<fastjson.version>1.2.37</fastjson.version>
+		<guava.version>18.0</guava.version>
+		<lombok.version>1.16.22</lombok.version>
+		<common-io.version>2.6</common-io.version>
+		<commons-logging.version>1.1.3</commons-logging.version>
+		<commons-lang.version>2.5</commons-lang.version>
+		<commons-beanutils.version>1.8.3</commons-beanutils.version>
+		<commons-configuration.version>1.6</commons-configuration.version>
+		<commons-codec.version>1.6</commons-codec.version>
+		<commons-fileupload.version>1.3.1</commons-fileupload.version>
+		<!--db-->
+		<mysql.version>5.1.32</mysql.version>
+		<druid-spring.version>1.1.6</druid-spring.version>
+		<mybatis-spring.version>1.3.2</mybatis-spring.version>
+		<!--seg-->
+		<seg-job.version>1.0.7-SNAPSHOT</seg-job.version>
+		<seg-dao.version>1.0.1-SNAPSHOT</seg-dao.version>
+		<seg-sequence.version>1.0.1-SNAPSHOT</seg-sequence.version>
+		<seg-dts.version>0.0.2-SNAPSHOT</seg-dts.version>
+		<seg-configserver.version>1.2.0</seg-configserver.version>
+		<spring-boot.version>1.5.10.RELEASE</spring-boot.version>
+		<spring-test>4.3.12.RELEASE</spring-test>
+		<seg-kofo.version>1.0-SNAPSHOT</seg-kofo.version>
+		<kofo-common.version>1.0-SNAPSHOT</kofo-common.version>
+		<web3j.version>4.4.0</web3j.version>
+		<!--<maven.deploy.skip>true</maven.deploy.skip>-->
+	</properties>
+
+	<dependencies>
+		<!--trace-->
+		<dependency>
+			<groupId>io.seg.kofo</groupId>
+			<artifactId>stability-spring-boot-starter</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>spring-boot-starter-data-redis</artifactId>
+					<groupId>org.springframework.boot</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>spring-cloud-starter-stream-rabbit</artifactId>
+					<groupId>org.springframework.cloud</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+
+			<!-- spring boot start -->
+			<dependency>
+				<!-- Import dependency management from Spring Boot -->
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring-boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-web</artifactId>
+				<version>${spring-boot.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter</artifactId>
+				<version>${spring-boot.version}</version>
+			</dependency>
+			<!-- spring boot end -->
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-test</artifactId>
+				<version>${spring-test}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!--swagger2 begin-->
+			<dependency>
+				<groupId>io.springfox</groupId>
+				<artifactId>springfox-swagger2</artifactId>
+				<version>2.7.0</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>guava</artifactId>
+						<groupId>com.google.guava</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>io.springfox</groupId>
+				<artifactId>springfox-swagger-ui</artifactId>
+				<version>2.7.0</version>
+			</dependency>
+			<!--swagger2 end-->
+
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>26.0-jre</version>
+			</dependency>
+
+			<!--web 3j-->
+			<dependency>
+				<groupId>org.web3j</groupId>
+				<artifactId>core</artifactId>
+				<version>${web3j.version}</version>
+			</dependency>
+
+			<!--trace-->
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-sleuth</artifactId>
+				<version>1.3.3.RELEASE</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-sleuth</artifactId>
+				<version>1.3.3.RELEASE</version>
+			</dependency>
+			<dependency>
+				<groupId>io.seg.kofo</groupId>
+				<artifactId>stability-spring-boot-starter</artifactId>
+				<version>1.1.1-SNAPSHOT</version>
+			</dependency>
+
+			<!---db-->
+			<dependency>
+				<groupId>mysql</groupId>
+				<artifactId>mysql-connector-java</artifactId>
+				<version>${mysql.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.alibaba</groupId>
+				<artifactId>druid-spring-boot-starter</artifactId>
+				<version>${druid-spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mybatis.spring.boot</groupId>
+				<artifactId>mybatis-spring-boot-starter</artifactId>
+				<version>${mybatis-spring.version}</version>
+			</dependency>
+			<!--seg-->
+			<dependency>
+				<groupId>io.seg.framework</groupId>
+				<artifactId>framework-job-spring-boot-starter</artifactId>
+				<version>${seg-job.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.seg.framework</groupId>
+				<artifactId>framework-dao-mybatis</artifactId>
+				<version>${seg-dao.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.seg.framework</groupId>
+				<artifactId>framework-sequence-sdk</artifactId>
+				<version>${seg-sequence.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.ctrip.framework.apollo</groupId>
+				<artifactId>apollo-client</artifactId>
+				<version>${seg-configserver.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.seg.kofo</groupId>
+				<artifactId>kofo-common</artifactId>
+				<version>${kofo-common.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.seg.kofo</groupId>
+				<artifactId>gateway-api</artifactId>
+				<version>1.0-SNAPSHOT</version>
+			</dependency>
+
+			<!-- tools start -->
+			<dependency>
+				<groupId>com.alibaba</groupId>
+				<artifactId>fastjson</artifactId>
+				<version>${fastjson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>${common-io.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>${guava.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>${lombok.version}</version>
+			</dependency>
+			<!-- base util -->
+			<dependency>
+				<groupId>commons-logging</groupId>
+				<artifactId>commons-logging</artifactId>
+				<version>${commons-logging.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-lang</groupId>
+				<artifactId>commons-lang</artifactId>
+				<version>${commons-lang.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-fileupload</groupId>
+				<artifactId>commons-fileupload</artifactId>
+				<version>${commons-fileupload.version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>commons-io</artifactId>
+						<groupId>commons-io</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>${commons-codec.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-beanutils</groupId>
+				<artifactId>commons-beanutils</artifactId>
+				<version>${commons-beanutils.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+
+</project>
