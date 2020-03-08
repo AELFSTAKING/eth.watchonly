@@ -2,6 +2,9 @@
 
 package io.seg.kofo.ethwo.biz.service.impl;
 
+import com.google.common.collect.Lists;
+import io.seg.framework.dao.model.Order;
+import io.seg.framework.dao.model.QueryResult;
 import io.seg.kofo.api.enums.MsgTypeEnum;
 import io.seg.kofo.api.response.ResponseEnum;
 import io.seg.kofo.ethwo.biz.service.BlockCacheService;
@@ -17,10 +20,7 @@ import io.seg.kofo.ethwo.dao.po.MsgQueuePo;
 import io.seg.kofo.ethwo.dao.po.SyncHeightPo;
 import io.seg.kofo.ethwo.model.bo.SegBlock;
 import com.alibaba.fastjson.JSON;
-import io.seg.elasticjob.common.collect.Lists;
 import io.seg.framework.dao.BaseDao;
-import io.seg.framework.dao.model.Order;
-import io.seg.framework.dao.model.QueryResult;
 import io.seg.kofo.ethwo.model.bo.TransactionInfo;
 import io.seg.kofo.ethwo.model.bo.TransactionReceipt;
 import lombok.extern.slf4j.Slf4j;

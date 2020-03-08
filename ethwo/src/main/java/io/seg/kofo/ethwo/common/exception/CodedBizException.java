@@ -2,7 +2,7 @@ package io.seg.kofo.ethwo.common.exception;
 
 
 import io.seg.kofo.api.response.ResponseEnum;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * 带RespCode的业务异常，可以自动转换成响应JSON

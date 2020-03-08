@@ -1,30 +1,26 @@
 package io.seg.kofo.ethwo.biz.job;
 
+import com.google.common.collect.Lists;
 import io.seg.kofo.ethwo.biz.service.BlockCacheService;
 import io.seg.kofo.ethwo.biz.service.BlockHeightService;
 import io.seg.kofo.ethwo.biz.service.MsgQueueService;
 import io.seg.kofo.ethwo.biz.service.SyncHeightService;
 import io.seg.kofo.ethwo.common.config.FullNodeCache;
 import io.seg.kofo.ethwo.common.config.WatchOnlyProperties;
-import io.seg.kofo.ethwo.common.util.GethRpcClient;
-import io.seg.kofo.ethwo.common.util.TraceIdUtil;
 import io.seg.kofo.ethwo.dao.po.BlockCachePo;
 import io.seg.kofo.ethwo.dao.po.BlockHeightPo;
+import io.seg.kofo.ethwo.dao.po.MsgQueuePo;
 import io.seg.kofo.ethwo.dao.po.SyncHeightPo;
-import com.dangdang.ddframe.job.api.ShardingContext;
-import com.dangdang.ddframe.job.api.dataflow.DataflowJob;
-import io.seg.elasticjob.common.collect.Lists;
-import io.seg.kofo.ethwo.model.bo.SegBlock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.response.EthBlock;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 
 /**
  * 检查消息队列是否有空位
@@ -33,7 +29,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
-public class MsgGeneratorDataFlowJob implements DataflowJob{
+public class MsgGeneratorDataFlowJob {
     @Autowired
     MsgQueueService msgQueueService;
     @Autowired
@@ -47,13 +43,30 @@ public class MsgGeneratorDataFlowJob implements DataflowJob{
     @Autowired
     FullNodeCache fullNodeCache;
 
-    @Override
-    public List fetchData(ShardingContext shardingContext) {
+    @Scheduled(initialDelay = 4000, fixedDelay = 10000)
+    public void excute() {
+        int processCount = 0;
+
+        log.info("generate block start:");
+
+        while (true) {
+            SyncHeightPo msgQueuePo = fetchData();
+
+            if (Objects.isNull(msgQueuePo)) {
+                log.info("generate block end,process {} block.", processCount);
+                break;
+            }
+            processCount++;
+            processData(msgQueuePo);
+        }
+    }
+
+    public SyncHeightPo fetchData() {
         log.info("msgGenerator ready to fetchData");
         try {
             Integer msgQueueLimit = Integer.valueOf(watchOnlyProperties.getMsgQueueLimit());
             if (msgQueueLimit <= msgQueueService.countMsgQueue()){
-                return new ArrayList();
+                return null;
             }
             BlockHeightPo blockHeightPo = blockHeightService.selectOne(BlockHeightPo.builder().build());
             //表中只有一条数据
@@ -61,23 +74,20 @@ public class MsgGeneratorDataFlowJob implements DataflowJob{
             if (syncHeightPo.getSyncHeight() >= blockHeightPo.getNodeLatestBlockHeight()){
                 //同步高度大于全节点最高高度则不同步
                 log.info("syncHeight:{} >= node height:{} ",syncHeightPo.getSyncHeight(),blockHeightPo.getNodeLatestBlockHeight());
-                return new ArrayList();
+                return null;
             }
             log.info("ready to syncHeight from :{} to:{}",syncHeightPo.getSyncHeight(),syncHeightPo.getSyncHeight()+1);
             //获取当前已同步到的高度进行后续处理
-            return Lists.newArrayList(syncHeightPo);
+            return syncHeightPo;
         }catch (Exception e){
             log.error("msgGenerator fetchData exception:{}",e.getMessage(),e);
         }
-        return new ArrayList();
+        return null;
     }
 
-    @Override
-    public void processData(ShardingContext shardingContext, List list) {
-        SyncHeightPo syncHeightPo = (SyncHeightPo) list.get(0);
+    public void processData(SyncHeightPo syncHeightPo) {
         Web3j web3j = null;
         try {
-            TraceIdUtil.startTrace();
             web3j = fullNodeCache.getWeb3j();
             EthBlock header = web3j.ethGetBlockByNumber(DefaultBlockParameter.valueOf(BigInteger.valueOf(syncHeightPo.getSyncHeight()+1)),false).send();
             //要求syncHeight必须填写hash否则需要blockCache来修补
@@ -133,8 +143,6 @@ public class MsgGeneratorDataFlowJob implements DataflowJob{
             log.info("syncHeight finish,result:{},isForking:{},processHeight:{}",isSuccess,isForking,header.getBlock().getNumber());
         } catch (Exception e) {
             log.error("MsgGeneratorDataFlowJob processData exception:{}",e.getMessage(),e);
-        }finally {
-            TraceIdUtil.endTrace();
         }
 
 

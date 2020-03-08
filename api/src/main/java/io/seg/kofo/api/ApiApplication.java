@@ -8,7 +8,7 @@ import org.springframework.cloud.netflix.feign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableEurekaClient
-@EnableFeignClients(basePackages = {"io.seg", "io.seg.framework.sequence.sdk.client"})
+@EnableFeignClients(basePackages = {"io.seg"})
 @Slf4j
 public class ApiApplication {
 

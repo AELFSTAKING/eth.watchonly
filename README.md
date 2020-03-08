@@ -9,11 +9,25 @@
 ## 外部依赖
 - mysql v5.7
 - apollo v2.0
-- zookeeper
 - eureka 
-- sequence 全局序列号产生服务
-- seg-job
 - geth
+
+## kofo内部依赖
+- maven本地安装依赖包：
+    - mvn install:install-file -DgroupId=io.seg.framework -DartifactId=framework-dao-mybatis -Dversion=1.0.1-SNAPSHOT -Dfile=lib/framework-dao-mybatis-1.0.1-SNAPSHOT.jar -Dpackaging=jar -DgeneratePom=true
+    - mvn install:install-file -Dgrou1pId=io.seg.framework -DartifactId=framework-dao-api -Dversion=1.0.1-SNAPSHOT -Dfile=lib/framework-dao-api-1.0.1-SNAPSHOT.jar -Dpackaging=jar -DgeneratePom=true
+    - mvn install:install-file -DgroupId=io.seg.kofo -DartifactId=kofo-common -Dversion=1.0-SNAPSHOT -Dfile=lib/kofo-common-1.0-SNAPSHOT.jar -Dpackaging=jar -DgeneratePom=true
+
+## 表结构
+- 见 ethwo/src/main/resources/scripts/kofo-eth-wo.sql
+- 其中sync_height表保存当前同步高度及区块hash（单条记录），同步区块定时任务会更新该条记录。
+- block_height表记录当前节点高度状况、外部节点高度、当前业务回调高度等。只有一条记录。
+- block_cache表记录同步到的高度和hash，分叉逻辑依赖该表。
+- msg_queue表模拟回调业务方的消息队列，串行回调成功后有定时任务清理该表。
+
+## 启动步骤
+- 依赖apollo管理配置
+- 配置项参考ethwo/src/main/resources/application.properties中注释部分，将其配置到apollo中启动即可
 
 ## 接口介绍
 - /queryAddressNonce 获取地址nonce值

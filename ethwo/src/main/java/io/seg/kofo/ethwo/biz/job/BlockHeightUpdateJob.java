@@ -1,18 +1,13 @@
 package io.seg.kofo.ethwo.biz.job;
 
 import io.seg.kofo.common.controller.RespData;
-import io.seg.kofo.ethereum.gateway.api.integration.EthAnalyzerClient;
-import io.seg.kofo.ethereum.gateway.api.vo.request.message.LatestBlockInfoMessage;
 import io.seg.kofo.ethwo.biz.service.BlockHeightService;
 import io.seg.kofo.ethwo.biz.service.WalletService;
 import io.seg.kofo.ethwo.common.config.FullNodeCache;
 import io.seg.kofo.ethwo.common.config.WatchOnlyProperties;
 import io.seg.kofo.ethwo.common.util.Numeric;
-import io.seg.kofo.ethwo.common.util.TraceIdUtil;
 import io.seg.kofo.ethwo.dao.po.BlockHeightPo;
 import com.alibaba.fastjson.JSONObject;
-import com.dangdang.ddframe.job.api.ShardingContext;
-import com.dangdang.ddframe.job.api.simple.SimpleJob;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,13 +25,12 @@ import java.util.Date;
  */
 @Slf4j
 @Component
-public class BlockHeightUpdateJob implements SimpleJob {
+public class BlockHeightUpdateJob  {
     @Autowired
     BlockHeightService blockHeightService;
     @Autowired
     WatchOnlyProperties watchOnlyProperties;
-    @Autowired
-    EthAnalyzerClient ethAnaLyzerClient;
+
     @Autowired
     WalletService walletService;
     @Autowired
@@ -45,23 +39,15 @@ public class BlockHeightUpdateJob implements SimpleJob {
     FullNodeCache fullNodeCache;
 
 
-    @Override
-    public void execute(ShardingContext shardingContext) {
+    public void execute() {
         try {
-            TraceIdUtil.startTrace();
             //默认只有一条记录
             BlockHeightPo blockHeightPo = blockHeightService.selectOne(BlockHeightPo.builder().build());
             updateNodeHeight(blockHeightPo);
             updateLatestHeight(blockHeightPo);
-            LatestBlockInfoMessage latestBlock = new LatestBlockInfoMessage();
-            latestBlock.setNodeLatestBlockNum(blockHeightPo.getNodeLatestBlockHeight());
-            latestBlock.setLatestBlockNum(blockHeightPo.getLatestBlockHeight());
-            RespData<Integer> respData = ethAnaLyzerClient.latestBlockNotify(latestBlock);
-            log.info("callbackBlockHeight response :{}", respData);
+            //todo callback biz  block-height;
         } catch (Exception e) {
             log.error("BlockHeightUpdateJob exception:{}", e.getMessage(), e);
-        }finally {
-            TraceIdUtil.endTrace();
         }
 
     }

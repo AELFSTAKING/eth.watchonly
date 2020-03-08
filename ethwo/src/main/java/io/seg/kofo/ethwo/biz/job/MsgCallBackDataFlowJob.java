@@ -1,68 +1,65 @@
 package io.seg.kofo.ethwo.biz.job;
 
-import io.seg.kofo.ethereum.gateway.api.integration.EthAnalyzerClient;
-import io.seg.kofo.ethereum.gateway.api.vo.request.MessageReq;
 import io.seg.kofo.ethwo.biz.service.BlockHeightService;
 import io.seg.kofo.ethwo.biz.service.MsgQueueService;
-import io.seg.kofo.ethwo.common.util.TraceIdUtil;
 import io.seg.kofo.ethwo.dao.po.MsgQueuePo;
-import com.dangdang.ddframe.job.api.ShardingContext;
-import com.dangdang.ddframe.job.api.dataflow.DataflowJob;
-import io.seg.kofo.common.controller.RespData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Component
-public class MsgCallBackDataFlowJob implements DataflowJob {
+public class MsgCallBackDataFlowJob  {
     @Autowired
     MsgQueueService msgQueueService;
     @Autowired
     BlockHeightService blockHeightService;
-    @Autowired
-    EthAnalyzerClient ethAnaLyzerClient;
 
-    @Override
-    public List fetchData(ShardingContext shardingContext) {
+    @Scheduled(initialDelay = 10000, fixedDelay = 10000)
+    public void excute() {
+        int processCount = 0;
+
+        log.info("callback block start:");
+
+        while (true) {
+            MsgQueuePo msgQueuePo = fetchData();
+
+            if (Objects.isNull(msgQueuePo)) {
+                log.info("callback block end,process {} block.", processCount);
+                break;
+            }
+            processCount++;
+            processData(msgQueuePo);
+        }
+    }
+
+    public MsgQueuePo fetchData() {
         try {
-            List list = msgQueueService.getMsgForCallBack();
-            log.info("msg callback fetch data:{}", list.size());
-            return list;
+            MsgQueuePo msgQueuePo = msgQueueService.getMsgForCallBack().get(0);
+            log.info("msg callback fetch data:{}", msgQueuePo.getHeight());
+            return msgQueuePo;
         } catch (Exception e) {
             log.error("msg callback exception:{}", e.getMessage(), e);
         }
-        return new ArrayList();
+        return null;
     }
 
-    @Override
-    public void processData(ShardingContext shardingContext, List list) {
-
-
+    public void processData( MsgQueuePo msgQueuePo) {
         try {
-            TraceIdUtil.startTrace();
-            MsgQueuePo msgQueuePo = (MsgQueuePo) list.get(0);
-            MessageReq req = new MessageReq();
-//        if (MsgTypeEnum.BLOCK_MSG.getCode().intValue() == msgQueuePo.getMsgType()){
-//        }
-            req.setData(msgQueuePo.getMsg());
-            req.setType(String.valueOf(msgQueuePo.getMsgType()));
-            log.info("processData callbackBlockInfo requestHeight:{} req size:{}", msgQueuePo.getHeight(), req.toString().length());
+            boolean isCallbackSuccess = false;
+            log.info("processData callbackBlockInfo requestHeight:{} ", msgQueuePo.getHeight());
 
-            //feign调用
-            RespData<Integer> respData = ethAnaLyzerClient.message(req);
-            log.info("processData callbackBlockInfo requestHeight:{} response:{}", msgQueuePo.getHeight(), respData);
-            if (respData.isSuccess()) {
+            //todo callback biz msgQueuePo.getMsg()
+            log.info("processData callbackBlockInfo requestHeight:{}", msgQueuePo.getHeight());
+            if (isCallbackSuccess) {
                 //更新msg回调状态 记录最新回调高度
                 msgQueueService.updateCallBackInfo(msgQueuePo);
             }
         }catch (Exception e){
             log.error("msg call back error:{}",e.getMessage(),e);
-        }finally {
-            TraceIdUtil.endTrace();
         }
 
 
