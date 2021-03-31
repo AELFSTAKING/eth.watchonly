@@ -29,7 +29,7 @@
 		<spring-cloud.version>Edgware.SR3</spring-cloud.version>
 		<!--util-->
 		<fastjson.version>1.2.37</fastjson.version>
-		<guava.version>18.0</guava.version>
+		<guava.version>29.0-jre</guava.version>
 		<lombok.version>1.16.22</lombok.version>
 		<common-io.version>2.6</common-io.version>
 		<commons-logging.version>1.1.3</commons-logging.version>
@@ -119,7 +119,7 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>26.0-jre</version>
+				<version>29.0-jre</version>
 			</dependency>
 
 			<!--web 3j-->
